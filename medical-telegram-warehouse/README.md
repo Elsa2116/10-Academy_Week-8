@@ -1,4 +1,4 @@
-# Medical Telegram Warehouse
+## Medical Telegram Warehouse
 
 > **End-to-end data pipeline for Ethiopian medical & pharmaceutical Telegram channels**
 > Telegram scraping → PostgreSQL data lake → dbt star schema → YOLOv8 enrichment → FastAPI analytics → Dagster orchestration
@@ -113,6 +113,7 @@ python -m src.scraper
 ```
 
 Outputs:
+
 - `data/raw/telegram_messages/YYYY-MM-DD/{channel}.json`
 - `data/raw/images/{channel}/{message_id}.jpg`
 - `logs/scraper.log`
@@ -149,6 +150,7 @@ uvicorn api.main:app --reload --port 8000
 ```
 
 Browse to:
+
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
@@ -226,14 +228,14 @@ medical-telegram-warehouse/
 
 ## API Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/health` | Database connectivity check |
-| `GET` | `/api/reports/top-products?limit=10` | Top mentioned product terms |
-| `GET` | `/api/channels/{channel_name}/activity` | Daily posting metrics for a channel |
-| `GET` | `/api/search/messages?query=paracetamol&limit=20` | Keyword search across all messages |
-| `GET` | `/api/reports/visual-content` | Image usage & YOLO category stats per channel |
-| `GET` | `/api/channels` | List all channels with summary stats |
+| Method | Path                                              | Description                                   |
+| ------ | ------------------------------------------------- | --------------------------------------------- |
+| `GET`  | `/health`                                         | Database connectivity check                   |
+| `GET`  | `/api/reports/top-products?limit=10`              | Top mentioned product terms                   |
+| `GET`  | `/api/channels/{channel_name}/activity`           | Daily posting metrics for a channel           |
+| `GET`  | `/api/search/messages?query=paracetamol&limit=20` | Keyword search across all messages            |
+| `GET`  | `/api/reports/visual-content`                     | Image usage & YOLO category stats per channel |
+| `GET`  | `/api/channels`                                   | List all channels with summary stats          |
 
 ---
 
@@ -247,43 +249,43 @@ pytest tests/ -v
 
 ## dbt Tests
 
-| Test | Type | What it checks |
-|------|------|----------------|
-| `unique` / `not_null` on primary keys | Schema | Data integrity |
-| `accepted_values` on `channel_type` | Schema | Enum safety |
-| `relationships` on FK columns | Schema | Referential integrity |
-| `assert_no_future_messages` | Custom | No clock-skew in scraper |
-| `assert_positive_views` | Custom | No negative view counts |
-| `assert_fk_messages_to_channels` | Custom | No orphaned fact rows |
+| Test                                  | Type   | What it checks           |
+| ------------------------------------- | ------ | ------------------------ |
+| `unique` / `not_null` on primary keys | Schema | Data integrity           |
+| `accepted_values` on `channel_type`   | Schema | Enum safety              |
+| `relationships` on FK columns         | Schema | Referential integrity    |
+| `assert_no_future_messages`           | Custom | No clock-skew in scraper |
+| `assert_positive_views`               | Custom | No negative view counts  |
+| `assert_fk_messages_to_channels`      | Custom | No orphaned fact rows    |
 
 ---
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `TELEGRAM_API_ID` | From https://my.telegram.org |
-| `TELEGRAM_API_HASH` | From https://my.telegram.org |
-| `TELEGRAM_PHONE` | Your registered phone number |
-| `POSTGRES_HOST` | PostgreSQL host (default: `localhost`) |
-| `POSTGRES_PORT` | PostgreSQL port (default: `5432`) |
-| `POSTGRES_DB` | Database name |
-| `POSTGRES_USER` | Database user |
-| `POSTGRES_PASSWORD` | Database password |
-| `YOLO_MODEL` | YOLO weights file (default: `yolov8n.pt`) |
+| Variable                    | Description                                |
+| --------------------------- | ------------------------------------------ |
+| `TELEGRAM_API_ID`           | From https://my.telegram.org               |
+| `TELEGRAM_API_HASH`         | From https://my.telegram.org               |
+| `TELEGRAM_PHONE`            | Your registered phone number               |
+| `POSTGRES_HOST`             | PostgreSQL host (default: `localhost`)     |
+| `POSTGRES_PORT`             | PostgreSQL port (default: `5432`)          |
+| `POSTGRES_DB`               | Database name                              |
+| `POSTGRES_USER`             | Database user                              |
+| `POSTGRES_PASSWORD`         | Database password                          |
+| `YOLO_MODEL`                | YOLO weights file (default: `yolov8n.pt`)  |
 | `YOLO_CONFIDENCE_THRESHOLD` | Min detection confidence (default: `0.25`) |
 
 ---
 
 ## Channels Scraped
 
-| Channel | Type |
-|---------|------|
-| CheMed123 | Medical products |
+| Channel           | Type               |
+| ----------------- | ------------------ |
+| CheMed123         | Medical products   |
 | lobelia4cosmetics | Cosmetics & health |
-| tikvahethiopia | Pharmaceuticals |
-| DoctorsETBot | Medical |
-| eahci | Health |
+| tikvahethiopia    | Pharmaceuticals    |
+| DoctorsETBot      | Medical            |
+| eahci             | Health             |
 
 Add more channels to `TELEGRAM_CHANNELS` in `src/config.py`.
 
