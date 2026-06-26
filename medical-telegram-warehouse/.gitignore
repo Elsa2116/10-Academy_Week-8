@@ -1,0 +1,92 @@
+#################################
+# ENVIRONMENT SECRETS
+#################################
+.env
+*.env
+
+#################################
+# PYTHON
+#################################
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+venv/
+env/
+ENV/
+.venv/
+
+*.egg-info/
+dist/
+build/
+.eggs/
+
+#################################
+# JUPYTER NOTEBOOKS
+#################################
+.ipynb_checkpoints/
+
+#################################
+# DBT (IMPORTANT)
+#################################
+medical_warehouse/target/
+medical_warehouse/dbt_packages/
+medical_warehouse/logs/
+
+# sometimes dbt creates local profiles
+profiles.yml
+
+#################################
+# TELEGRAM / TELETHON SESSIONS
+#################################
+*.session
+*.session-journal
+
+#################################
+# DATA LAKE (VERY IMPORTANT)
+# do NOT push raw data or images
+#################################
+data/raw/
+data/processed/
+data/**/raw/
+data/**/images/
+
+#################################
+# YOLO MODELS
+#################################
+*.pt
+
+#################################
+# LOG FILES
+#################################
+logs/
+*.log
+
+#################################
+# DAGSTER
+#################################
+.dagster/
+
+#################################
+# DOCKER
+#################################
+.docker/
+
+#################################
+# IDE / EDITORS
+#################################
+.vscode/
+.idea/
+
+#################################
+# OS FILES
+#################################
+.DS_Store
+Thumbs.db
+
+#################################
+# NODE (just in case)
+#################################
+node_modules/

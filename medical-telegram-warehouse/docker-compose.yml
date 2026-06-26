@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: medical_warehouse_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-medical_warehouse}
+      POSTGRES_USER: ${POSTGRES_USER:-warehouse_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-warehouse_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-warehouse_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: medical_api
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-warehouse_user}:${POSTGRES_PASSWORD:-warehouse_pass}@postgres:5432/${POSTGRES_DB:-medical_warehouse}
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  dagster:
+    build: .
+    container_name: medical_dagster
+    command: dagster dev -f pipeline.py -p 3000 -h 0.0.0.0
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-warehouse_user}:${POSTGRES_PASSWORD:-warehouse_pass}@postgres:5432/${POSTGRES_DB:-medical_warehouse}
+      DAGSTER_HOME: /app/.dagster
+    volumes:
+      - .:/app
+      - dagster_home:/app/.dagster
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  dagster_home:

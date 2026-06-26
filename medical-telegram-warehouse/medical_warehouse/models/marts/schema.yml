@@ -1,0 +1,115 @@
+version: 2
+
+models:
+  - name: dim_channels
+    description: >
+      Channel dimension — one row per unique Telegram channel with pre-computed
+      summary statistics (total posts, avg views, date range) and a manually
+      assigned channel_type (Medical / Pharmaceutical / Cosmetics / Other).
+    columns:
+      - name: channel_key
+        description: "Surrogate key (MD5 hash of channel_name)."
+        data_tests:
+          - unique
+          - not_null
+      - name: channel_name
+        description: "Telegram channel handle."
+        data_tests:
+          - unique
+          - not_null
+      - name: channel_type
+        description: "Business classification: Medical, Pharmaceutical, Cosmetics, or Other."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ["Medical", "Pharmaceutical", "Cosmetics", "Other"]
+      - name: total_posts
+        description: "Total number of posts scraped from this channel."
+        data_tests:
+          - not_null
+      - name: avg_views
+        description: "Average view count across all channel messages."
+      - name: first_post_date
+        description: "Date of the earliest message in the dataset."
+      - name: last_post_date
+        description: "Date of the most recent message in the dataset."
+
+  - name: dim_dates
+    description: >
+      Date dimension — one row per calendar day from 2020-01-01 to one year
+      from today. Provides rich time attributes for slicing and dicing.
+    columns:
+      - name: date_key
+        description: "Integer surrogate key in YYYYMMDD format."
+        data_tests:
+          - unique
+          - not_null
+      - name: full_date
+        description: "The calendar date."
+        data_tests:
+          - unique
+          - not_null
+      - name: day_of_week
+        description: "ISO day of week (1=Monday, 7=Sunday)."
+      - name: is_weekend
+        description: "True if Saturday or Sunday."
+
+  - name: fct_messages
+    description: >
+      Central fact table — one row per Telegram message, linked to
+      dim_channels and dim_dates via surrogate keys.
+    columns:
+      - name: message_id
+        description: "Telegram message ID."
+        data_tests:
+          - not_null
+      - name: channel_key
+        description: "Foreign key → dim_channels."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_channels')
+              field: channel_key
+      - name: date_key
+        description: "Foreign key → dim_dates."
+        data_tests:
+          - relationships:
+              to: ref('dim_dates')
+              field: date_key
+      - name: view_count
+        description: "Number of views on the message."
+        data_tests:
+          - not_null
+      - name: forward_count
+        description: "Number of forwards."
+        data_tests:
+          - not_null
+      - name: has_image
+        description: "True when the message contains a photo."
+        data_tests:
+          - not_null
+      - name: message_length
+        description: "Character count of message_text."
+
+  - name: fct_image_detections
+    description: >
+      Image-level fact table enriched by YOLOv8 object detection.
+      One row per image processed, linked to the messages fact table.
+    columns:
+      - name: message_id
+        description: "Foreign key → fct_messages."
+        data_tests:
+          - not_null
+      - name: channel_key
+        description: "Foreign key → dim_channels."
+        data_tests:
+          - not_null
+      - name: image_category
+        description: "YOLO-derived category: promotional, product_display, lifestyle, other."
+        data_tests:
+          - accepted_values:
+              values: ["promotional", "product_display", "lifestyle", "other"]
+      - name: confidence_score
+        description: "Maximum detection confidence score (0–1)."
+      - name: num_detections
+        description: "Number of objects detected in the image."

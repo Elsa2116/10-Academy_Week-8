@@ -1,0 +1,73 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: "Raw data loaded directly from the Telegram data lake JSON files."
+    tables:
+      - name: telegram_messages
+        description: "One row per Telegram message scraped from the configured channels."
+        columns:
+          - name: message_id
+            description: "Telegram message ID (unique within a channel)."
+          - name: channel_name
+            description: "The Telegram channel handle."
+          - name: message_date
+            description: "UTC timestamp of when the message was posted."
+          - name: message_text
+            description: "Full text content of the message."
+          - name: has_media
+            description: "True if the message contains any media attachment."
+          - name: is_photo
+            description: "True if the media is a photo."
+          - name: image_path
+            description: "Local filesystem path to the downloaded image, if applicable."
+          - name: views
+            description: "Number of views recorded by Telegram."
+          - name: forwards
+            description: "Number of times the message was forwarded."
+          - name: scraped_at
+            description: "UTC timestamp when this record was scraped."
+
+      - name: yolo_detections
+        description: "YOLOv8 object-detection results, one row per image."
+        columns:
+          - name: message_id
+            description: "Foreign key to telegram_messages."
+          - name: channel_name
+            description: "The Telegram channel handle."
+          - name: image_category
+            description: "Business classification: promotional, product_display, lifestyle, other."
+          - name: max_confidence
+            description: "Highest detection confidence score in the image."
+          - name: num_detections
+            description: "Total number of objects detected."
+
+models:
+  - name: stg_telegram_messages
+    description: >
+      Cleaned and standardised Telegram messages. Casts types, filters
+      empty records, and adds derived fields (message_length, has_image).
+    columns:
+      - name: message_id
+        description: "Telegram message ID."
+        data_tests:
+          - not_null
+      - name: channel_name
+        description: "Channel handle."
+        data_tests:
+          - not_null
+      - name: message_date
+        description: "UTC timestamp of the message."
+        data_tests:
+          - not_null
+      - name: message_text
+        description: "Cleaned message text."
+      - name: message_length
+        description: "Character count of message_text."
+      - name: has_image
+        description: "Boolean flag — true when the message includes a photo."
+      - name: view_count
+        description: "Number of views (never null, defaults to 0)."
+      - name: forward_count
+        description: "Number of forwards (never null, defaults to 0)."
